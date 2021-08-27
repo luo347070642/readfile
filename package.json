@@ -1,0 +1,19 @@
+{
+  "name": "readfile",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "node ./index.js"
+  },
+  "keywords": [],
+  "author": "lpy",
+  "license": "ISC",
+  "dependencies": {
+    "mammoth": "^1.4.17"
+  },
+  "devDependencies": {
+    "log4js": "^6.3.0"
+  }
+}
