@@ -1,0 +1,11 @@
+{
+  "defaultSeverity": "error",
+  "extends": ["tslint:recommended"],
+  "jsRules": {},
+  "rules": {
+    "no-console": false,
+    "no-shadowed-variable": false,
+    "@typescript-eslint/no-var-requires": 0
+  },
+  "rulesDirectory": []
+}
