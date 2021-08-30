@@ -1,4 +1,4 @@
-class RegEnum {
+class RegEntity {
   static regTest = /^([一,二,三,四,五,六,七,八,九,十]{1,10}、{1}|第[一,二,三,四,五,六,七,八,九,十]{1,10}条)/
   static rmbReg = /(人民币[\s,\w]+元|￥[\s,\w]+元)/
   static numeralMaxReg = /大写：[\s\S]+万[\s\S]+仟[\s\S]+佰[\s\S]+拾[\s\S]+元整/
@@ -13,4 +13,4 @@ class RegEnum {
     /(储存(\S?|\W+)类型)|(存储管数)|(数量标准)|(低于处理方式)|(PBMC存储)|(^脐带干细胞)|(^胎盘干细胞)|(^围产期干细胞同存)|(^补采\S+退存)|(^\d+管)/
 }
 
-export default RegEnum
+export default RegEntity
