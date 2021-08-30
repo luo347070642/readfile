@@ -1,26 +1,12 @@
 import mammoth from 'mammoth'
-
 import log4js from 'log4js'
 import fs from 'fs'
 import path from 'path'
 import config from '../config/logconf'
+import RegEntity from '../entity/RegEntity'
 
 log4js.configure(config)
 const logger = log4js.getLogger('readFileUtil')
-// log4js.connectLogger(logger, { level: 'debug' })
-
-const regTest = /^([一,二,三,四,五,六,七,八,九,十]{1,10}、{1}|第[一,二,三,四,五,六,七,八,九,十]{1,10}条)/
-const rmbReg = /(人民币[\s,\w]+元|￥[\s,\w]+元)/
-const numeralMaxReg = /大写：[\s\S]+万[\s\S]+仟[\s\S]+佰[\s\S]+拾[\s\S]+元整/
-const lowerCaseLetterReg = /^[a-z]+./
-const titleLetterReg = /^i+./
-const accountReg = /(户(\S?|\W+)名：?)|(开户行：)|(账(\S?|\W+)号：?)|(汇款备注：)/
-const countReg = /细胞[\s,\w]+管/
-const countReg1 = /存储管数为[\s,\w]+管/
-const titleNumReg = /^\d+(.\d+)?(.\d+)?(.\d+)?(.\d+)?/
-const titleNumReg2 = /(（\d+）)/
-const tableReg =
-  /(储存(\S?|\W+)类型)|(存储管数)|(数量标准)|(低于处理方式)|(PBMC存储)|(^脐带干细胞)|(^胎盘干细胞)|(^围产期干细胞同存)|(^补采\S+退存)|(^\d+管)/
 
 const dirPath = path.resolve(__dirname, '../../')
 interface ParamVo {
@@ -29,7 +15,7 @@ interface ParamVo {
   suffix: string
 }
 
-const fileOpts: any = {
+const fileOpts = {
   IcStorageServiceTripartite: '1、免疫细胞存储技术服务三方协议（宁波海益专用） ',
   IcCollectInformedConsentTripartite: '1-1三方线上---免疫细胞采集知情同意书终版（宁波海益） ',
   IcStorageService: '2、免疫细胞存储技术服务协议（宁波海益专用） ',
@@ -68,12 +54,12 @@ class ReadFile {
     if (item.includes('知情同意书') || /(签字|签名)(\W?\S?|\W+\S+)：+/.test(item)) {
       item = ''
     }
-    if (rmbReg.test(item)) {
-      item = item.replace(rmbReg, `${/￥[\s,\w]+元/.test(item) ? '￥' : '人民币'}<span>{{money}}</span>元`)
+    if (RegEntity.rmbReg.test(item)) {
+      item = item.replace(RegEntity.rmbReg, `${/￥[\s,\w]+元/.test(item) ? '￥' : '人民币'}<span>{{money}}</span>元`)
     }
-    if (numeralMaxReg.test(item)) {
+    if (RegEntity.numeralMaxReg.test(item)) {
       item = item.replace(
-        numeralMaxReg,
+        RegEntity.numeralMaxReg,
         `大写：<b v-for='(item, index) in amountInWords' :key='index'><span v-show='index % 2 === 0'>{{item}}</span><b v-show='index % 2 !== 0'>{{item}}</b></b>`
       )
     }
@@ -86,7 +72,7 @@ class ReadFile {
     // }
     if (fileName.includes('InformedConsent') && /\d+、/.test(item)) {
       item = `<div class="title">${txt}</div>`
-    } else if (regTest.test(item)) {
+    } else if (RegEntity.regTest.test(item)) {
       item = fileName.includes('InformedConsent') ? `<p>${txt}</p>` : `<div class="title">${txt}</div>`
     } else if (/≥\d+.?\d?×/.test(item)) {
       item = `<td>${txt}</td>`
@@ -96,7 +82,7 @@ class ReadFile {
       } else {
         item = /^(\d+)管/.test(item) ? `<td>${txt}</td>` : `<td>${txt}</td></tr>`
       }
-    } else if (titleNumReg.test(item)) {
+    } else if (RegEntity.titleNumReg.test(item)) {
       const tempArr = item.split('').filter((str: string) => str === '.')
       if (tempArr.length === 1) {
         item = `<p>${txt}</p>`
@@ -105,7 +91,7 @@ class ReadFile {
           const tempArr2 = nextItem.split('').filter(str => str === '.')
           if (tempArr2.length > 1 || /(户(\S?|\W+)名：?)/.test(nextItem)) {
             item = `<div class="small">${txt}</div>`
-          } else if (lowerCaseLetterReg.test(nextItem) || titleNumReg2.test(nextItem)) {
+          } else if (RegEntity.lowerCaseLetterReg.test(nextItem) || RegEntity.titleNumReg2.test(nextItem)) {
             item = `<div class="detail">${txt}</div>`
           }
         }
@@ -118,31 +104,31 @@ class ReadFile {
           const nextItem = txtArr[i + 1]
           const tempArr2 = nextItem.split('').filter(str => str === '.')
           if (
-            (tempArr2.length === 1 || regTest.test(nextItem)) &&
-            !lowerCaseLetterReg.test(nextItem) &&
-            !titleNumReg2.test(nextItem)
+            (tempArr2.length === 1 || RegEntity.regTest.test(nextItem)) &&
+            !RegEntity.lowerCaseLetterReg.test(nextItem) &&
+            !RegEntity.titleNumReg2.test(nextItem)
           ) {
             item = `<div class="detail last-detail">${txt}</div>`
           }
         }
       }
-    } else if (titleLetterReg.test(item)) {
+    } else if (RegEntity.titleLetterReg.test(item)) {
       item = `<div class="second">${txt}</div>`
-    } else if (lowerCaseLetterReg.test(item)) {
+    } else if (RegEntity.lowerCaseLetterReg.test(item)) {
       item = `<div class="third">${txt}</div>`
-    } else if (accountReg.test(item)) {
+    } else if (RegEntity.accountReg.test(item)) {
       item = /(汇款备注：)/.test(item) ? `<p>${txt}</p>` : `<div class="account">${txt}</div>`
-    } else if (titleNumReg2.test(item)) {
+    } else if (RegEntity.titleNumReg2.test(item)) {
       item = `<div class="detail">${txt}</div>`
       if (i < txtArr.length - 1) {
         const nextItem = txtArr[i + 1]
-        if (lowerCaseLetterReg.test(nextItem)) {
+        if (RegEntity.lowerCaseLetterReg.test(nextItem)) {
           item = `<div class="detail">${txt}</div>`
         }
       }
     } else if (/注：\S+/.test(item)) {
       item = `<div class="detail last-detail">${txt}</div>`
-    } else if (tableReg.test(item)) {
+    } else if (RegEntity.tableReg.test(item)) {
       if (/储存(\S?|\W+)类型/.test(item)) {
         item = `<table><tr><td>${txt}</td>`
       } else if (/存储管数/.test(item) && /储存细胞类型/.test(txtArr[i - 1])) {
@@ -166,7 +152,10 @@ class ReadFile {
       item = item.trim().length > 1 ? `<p>${txt}</p>` : null
       if (i < txtArr.length - 1) {
         const nextItem = txtArr[i + 1]
-        if ((lowerCaseLetterReg.test(nextItem) || titleNumReg2.test(nextItem)) && !regTest.test(nextItem)) {
+        if (
+          (RegEntity.lowerCaseLetterReg.test(nextItem) || RegEntity.titleNumReg2.test(nextItem)) &&
+          !RegEntity.regTest.test(nextItem)
+        ) {
           item = `<div class="detail">${txt}</div>`
         }
       }
