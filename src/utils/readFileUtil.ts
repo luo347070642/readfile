@@ -6,7 +6,7 @@ import path from 'path'
 import config from '../config/logconf'
 
 log4js.configure(config)
-const logger = log4js.getLogger('logger')
+const logger = log4js.getLogger('readFileUtil')
 // log4js.connectLogger(logger, { level: 'debug' })
 
 const regTest = /^([一,二,三,四,五,六,七,八,九,十]{1,10}、{1}|第[一,二,三,四,五,六,七,八,九,十]{1,10}条)/
@@ -22,6 +22,7 @@ const titleNumReg2 = /(（\d+）)/
 const tableReg =
   /(储存(\S?|\W+)类型)|(存储管数)|(数量标准)|(低于处理方式)|(PBMC存储)|(^脐带干细胞)|(^胎盘干细胞)|(^围产期干细胞同存)|(^补采\S+退存)|(^\d+管)/
 
+const dirPath = path.resolve(__dirname, '../../')
 interface ParamVo {
   filePath: string
   outPath: string
@@ -187,7 +188,7 @@ class ReadFile {
     })
   }
   readFile(fileName: string, filePath: string, outPath: string) {
-    let tempPath = '../../template/word.vue.ftl'
+    let tempPath = `${dirPath}\\template\\word.vue.ftl`
     mammoth
       .extractRawText({ path: `${filePath}\\${fileName}` })
       .then((result: { value: any }) => {
@@ -208,7 +209,7 @@ class ReadFile {
           item = isContinue ? this.regReplace(fileName, txtArr, item, i) : false
           if (item) newTxtArr.push(item)
         })
-        tempPath = fileName.includes('InformedConsent') ? '../../template/word.vue.terms.ftl' : tempPath
+        tempPath = fileName.includes('InformedConsent') ? `${dirPath}\\template\\word.vue.ftl` : tempPath
         // 读取模板内容
         let tempStr = fs.readFileSync(tempPath, 'utf-8')
         tempStr = tempStr.replace('{{ fileContent }}', newTxtArr.join('\n        '))
@@ -218,7 +219,7 @@ class ReadFile {
           const file = `${fName}${this.suffix}`
           fs.writeFileSync(`${outPath}\\${file}`, tempStr)
           // 生成对应的 routes配置内容 文件
-          let routesStr = fs.readFileSync('./out/routes.txt', 'utf-8')
+          let routesStr = fs.readFileSync(`${dirPath}\\out\\routes.txt`, 'utf-8')
           routesStr += `
         {
           path: '/${fName}',
@@ -228,7 +229,7 @@ class ReadFile {
           },
           component: ${fName}
         },`
-          let componentStr = fs.readFileSync('./out/component.txt', 'utf-8')
+          let componentStr = fs.readFileSync(`${dirPath}\\out\\component.txt`, 'utf-8')
           componentStr += `
         // ${fileOpts[fName]}
         const ${fName} = (resolve) => {
@@ -238,7 +239,7 @@ class ReadFile {
         }`
           fs.writeFileSync('./out/component.txt', componentStr)
           fs.writeFileSync('./out/routes.txt', routesStr)
-          logger.info(`写入成功，文件路径： ${outPath}\\${file} `)
+          logger.info(`成功，路径： ${outPath}\\${file} `)
         })
       })
       .done()

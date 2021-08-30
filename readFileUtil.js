@@ -36,36 +36,36 @@ const tableReg =
 
 const fmtStr = 'YYYY-MM-DD HH:mm:ss'
 
-async function main(filePath, outPath) {
+async function main(filePath, outPath, suffix) {
   const createNewFileNames = [`./out/routes.txt`, `${outPath}/component.txt`]
   try {
     setLog(`初始化配置......`)
     createNewFileNames.forEach(item => createNewFile(item))
     setLog(`开始读写文件.....`)
-    readFileByDir(filePath, outPath)
+    readFileByDir(filePath, outPath, suffix)
   } catch (error) {
     setLog(`读写失败,报错信息：${error}`, 'error')
   }
 }
 
 // 递归读取目录文件
-async function readFileByDir(dir, outPath) {
+async function readFileByDir(dir, outPath, suffix) {
   const files = fs.readdirSync(dir)
   files.forEach(async fileName => {
     const fullPath = path.join(dir, fileName)
     const stat = fs.statSync(fullPath)
     if (stat.isDirectory()) {
-      readFileByDir(path.join(dir, fileName), path.join(outPath, fileName))
+      readFileByDir(path.join(dir, fileName), path.join(outPath, fileName), suffix)
     } else {
       if (!fileName.includes('~$')) {
-        await readFile(fileName, dir, outPath)
+        await readFile(fileName, dir, outPath, suffix)
       }
     }
   })
 }
 
 // 读取文件内容
-function readFile(fileName, filePath, outPath) {
+function readFile(fileName, filePath, outPath, suffix) {
   let tempPath = './template/word.vue.ftl'
   mammoth
     .extractRawText({ path: `${filePath}\\${fileName}` })
@@ -94,7 +94,7 @@ function readFile(fileName, filePath, outPath) {
       // 生产目录及文件
       fs.mkdir(outPath, () => {
         const fName = fileName.split('.')[0]
-        const file = `${fName}.vue`
+        const file = `${fName}${suffix}`
         fs.writeFileSync(`${outPath}\\${file}`, tempStr)
         // 生成对应的 routes配置内容 文件
         let routesStr = fs.readFileSync('./out/routes.txt', 'utf-8')
