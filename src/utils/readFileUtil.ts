@@ -103,11 +103,7 @@ class ReadFile {
         if (i < txtArr.length - 1) {
           const nextItem = txtArr[i + 1]
           const tempArr2 = nextItem.split('').filter(str => str === '.')
-          if (
-            (tempArr2.length === 1 || RegEntity.regTest.test(nextItem)) &&
-            !RegEntity.lowerCaseLetterReg.test(nextItem) &&
-            !RegEntity.titleNumReg2.test(nextItem)
-          ) {
+          if ((tempArr2.length === 1 || RegEntity.regTest.test(nextItem)) && !RegEntity.lowerCaseLetterReg.test(nextItem) && !RegEntity.titleNumReg2.test(nextItem)) {
             item = `<div class="detail last-detail">${txt}</div>`
           }
         }
@@ -152,10 +148,7 @@ class ReadFile {
       item = item.trim().length > 1 ? `<p>${txt}</p>` : null
       if (i < txtArr.length - 1) {
         const nextItem = txtArr[i + 1]
-        if (
-          (RegEntity.lowerCaseLetterReg.test(nextItem) || RegEntity.titleNumReg2.test(nextItem)) &&
-          !RegEntity.regTest.test(nextItem)
-        ) {
+        if ((RegEntity.lowerCaseLetterReg.test(nextItem) || RegEntity.titleNumReg2.test(nextItem)) && !RegEntity.regTest.test(nextItem)) {
           item = `<div class="detail">${txt}</div>`
         }
       }
@@ -177,7 +170,8 @@ class ReadFile {
     })
   }
   readFile(fileName: string, filePath: string, outPath: string) {
-    let tempPath = `${dirPath}\\template\\word.vue.ftl`
+    // let tempPath = `${dirPath}\\template\\word.vue.ftl`
+    let tempPath = `${dirPath}\\template\\word.html.ftl`
     mammoth
       .extractRawText({ path: `${filePath}\\${fileName}` })
       .then((result: { value: any }) => {
@@ -198,7 +192,7 @@ class ReadFile {
           item = isContinue ? this.regReplace(fileName, txtArr, item, i) : false
           if (item) newTxtArr.push(item)
         })
-        tempPath = fileName.includes('InformedConsent') ? `${dirPath}\\template\\word.vue.ftl` : tempPath
+        tempPath = fileName.includes('知情') ? `${dirPath}\\template\\word.html.terms.ftl` : tempPath
         // 读取模板内容
         let tempStr = fs.readFileSync(tempPath, 'utf-8')
         tempStr = tempStr.replace('{{ fileContent }}', newTxtArr.join('\n        '))
